@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model article {
+  id        Int      @id @default(autoincrement())
+  body      String
+  publish   Boolean  @default(true)
+  create_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP(0)")) @db.Timestamp(6)
+  update_at DateTime @default(now()) @db.Timestamp(6)
+  author_id Int
+  user      user     @relation(fields: [author_id], references: [id])
+}
+
+model user {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      role      @relation(fields: [role_id], references: [id])
+  role_id   Int
+  create_at DateTime  @default(dbgenerated("CURRENT_TIMESTAMP(0)")) @db.Timestamp(6)
+  update_at DateTime  @default(now()) @db.Timestamp(6)
+  article   article[]
+}
+
+model role {
+  id              Int               @id @default(autoincrement())
+  name            String
+  description     String
+  create_at       DateTime          @default(dbgenerated("CURRENT_TIMESTAMP(0)")) @db.Timestamp(6)
+  update_at       DateTime          @default(now()) @db.Timestamp(6)
+  role_permission role_permission[]
+  user            user[]
+}
+
+model permission {
+  id              Int               @id @default(autoincrement())
+  name            String
+  slug            String
+  description     String
+  create_at       DateTime          @default(dbgenerated("CURRENT_TIMESTAMP(0)")) @db.Timestamp(6)
+  update_at       DateTime          @default(now()) @db.Timestamp(6)
+  role_permission role_permission[]
+}
+
+model role_permission {
+  id            Int        @id @default(autoincrement())
+  role          role       @relation(fields: [role_id], references: [id])
+  role_id       Int
+  permission    permission @relation(fields: [permission_id], references: [id])
+  permission_id Int
+  create_at     DateTime   @default(dbgenerated("CURRENT_TIMESTAMP(0)")) @db.Timestamp(6)
+  update_at     DateTime   @default(now()) @db.Timestamp(6)
+}
